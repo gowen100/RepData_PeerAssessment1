@@ -135,8 +135,42 @@ legend('topright', lty = 1, lwd = 3, col = c("blue", "red"),
 ![](PA1_template_files/figure-html/plot3-1.png)<!-- -->
 
 
-
-
-
-
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Splitting the data into weekends(Saturday & Sunday) and other weekdays the average activity per interval shows a change.
+
+
+```r
+#function to determine if a day is a weekend
+daytype <- function(x){
+        weekday = as.POSIXlt(x, format = "%Y-%m-%d" )$wday
+        if (weekday == 6 | weekday == 0)
+          {return ("Weekend")}
+        else 
+          {return ("Weekday")}
+}
+
+#applyfunction to the data
+data$daytype <- lapply(data$date,daytype)
+
+data$daytype <- factor(data$daytype,levels = c("Weekday", "Weekend"))
+
+steps_by_interval_daytype<- data %>% group_by(interval,daytype) %>% summarise(meanSteps =mean(steps,na.rm=TRUE))  
+
+library(lattice)
+```
+
+```
+## Warning: package 'lattice' was built under R version 3.6.3
+```
+
+```r
+xyplot(meanSteps~interval | daytype, data = steps_by_interval_daytype,
+      type = 'l',
+      xlab = 'Interval',
+      ylab = 'Steps',
+      layout = c(1,2))
+```
+
+![](PA1_template_files/figure-html/plot4-1.png)<!-- -->
+
