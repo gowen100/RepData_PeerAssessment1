@@ -23,8 +23,8 @@ The variables included in this dataset are:
 
 
 
-```{r loaddata, message=FALSE, warning=FALSE,}
 
+```r
 #The first section of code downloads the file if not present and loads the data into raw data
 filename <- "activity.zip"
 
@@ -49,7 +49,7 @@ number_of_intervals <- nrow(steps_by_interval)
 
 
 ## What is mean total number of steps taken per day?
-Below is a histogram of the daily steps for the `r number_of_days` days in the study. Mean and median are shown on the graph
+Below is a histogram of the daily steps for the 61 days in the study. Mean and median are shown on the graph
 
 ### Observations
 
@@ -57,7 +57,8 @@ Below is a histogram of the daily steps for the `r number_of_days` days in the s
 * Mean and median close showing low skew in the data
 
 
-```{r plot1,fig.height=4,fig.width=8}
+
+```r
 with(dailysteps,hist(totalSteps,breaks=30,col="grey",xlab ="Steps per day",main="Total Number of Steps per Day"))
 abline(v=mean(dailysteps$totalSteps),lwd=3,col="red")
 abline(v=median(dailysteps$totalSteps,na.rm=TRUE),lwd=3,col="blue")
@@ -67,16 +68,17 @@ legend('topright', lty = 1, lwd = 3, col = c("blue", "red"),
                legend = c(paste('Mean: ', formatC(round(mean(dailysteps$totalSteps),0),big.mark = ",")),
                paste('Median: ', formatC(median(dailysteps$totalSteps),big.mark = ",")))
                )
-
 ```
+
+![](PA1_template_files/figure-html/plot1-1.png)<!-- -->
 
 ## What is the average daily activity pattern?
 
-A graph of the average activity level for each of the `r number_of_intervals` 5 minute intervals over the days
+A graph of the average activity level for each of the 288 5 minute intervals over the days
 
 
-```{r plot2,fig.height=4,fig.width=8}
 
+```r
 #graph the average steps per interval
 with(steps_by_interval,plot(interval,meanSteps,type="l",lwd=2,ylab="Total number of Steps"))
 
@@ -87,33 +89,38 @@ max_round <- round(max,1)
 
 #show the max level on the graph
 abline(h=max,col="red",lty=2,lwd=1)
-
-
-
 ```
-<br>**The max value is at `r max_round` at interval `r max_interval`**
+
+![](PA1_template_files/figure-html/plot2-1.png)<!-- -->
+<br>**The max value is at 206.2 at interval 835**
 
 
 ## Imputing missing values
 The data contains a number of missing steps values for intervals. This analysis fills these in with the average for that interval on other days
 
-```{r missing values}
+
+```r
 print(paste("Total number of missing steps is",formatC(sum(is.na(raw_data$steps)),big.mark=",")))
 ```
-```{r fill missing values}
+
+```
+## [1] "Total number of missing steps is 2,304"
+```
+
+```r
 data <- raw_data
 data$oldsteps <-data$steps
 
 data <- merge(data,steps_by_interval,by="interval")
 data$steps[is.na(data$steps)] <- data$meanSteps[is.na(data$steps)]
 newdailysteps<- data %>% group_by(date) %>% summarise(totalSteps =sum(steps,na.rm=TRUE))  
-
 ```
 
 Graphing the data with the gaps filled in gives the same mean and median
 
 
-```{r plot3,fig.height=4,fig.width=8}
+
+```r
 with(newdailysteps,hist(totalSteps,breaks=30,col="grey",xlab ="Steps per day with ",main="Total Number of Steps per Day \nwith NAs replaced"))
 abline(v=mean(newdailysteps$totalSteps),lwd=3,col="red")
 abline(v=median(newdailysteps$totalSteps,na.rm=TRUE),lwd=3,col="blue")
@@ -123,25 +130,13 @@ legend('topright', lty = 1, lwd = 3, col = c("blue", "red"),
                legend = c(paste('Mean: ', round(mean(newdailysteps$totalSteps),0)),
                paste('Median: ', round(median(newdailysteps$totalSteps),0)))
                )
-
 ```
+
+![](PA1_template_files/figure-html/plot3-1.png)<!-- -->
+
+
+
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-
-```{r}
-
-
-daytype <- function(x){
-        weekday = as.POSIXlt(x, format = "%Y-%m-%d" )$wday
-        if (weekday == 6 | weekday == 0)
-          {return ("Weekend")}
-        else 
-          {return ("Weekday")}
-}
-
-data$daytype <- lapply(data$date,daytype)
-
-
-```
-
